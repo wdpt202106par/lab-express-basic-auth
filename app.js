@@ -12,9 +12,22 @@ const app_name = require('./package.json').name;
 const debug = require('debug')(`${app_name}:${path.basename(__filename).split('.')[0]}`);
 
 const app = express();
+const session = require('express-session');
+
+const mongoStore= require('connect-mongo')(session)
 
 // require database configuration
 require('./configs/db.config');
+app.use(
+    session({
+      secret: 'super session secret',
+      resave: false,
+      saveUninitialized: true,
+      cookie: { maxAge: 60000 }, // 60 * 1000 ms === 1 min
+      store:new mongoStore({mongooseConnection:mongoose.connection,
+    ttl:60*60*24})
+    })
+  );
 
 // Middleware Setup
 app.use(logger('dev'));
